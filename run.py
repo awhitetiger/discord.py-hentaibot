@@ -5,8 +5,12 @@ import requests
 import json
 import math
 import urllib.request
+import os
+from pixivpy3 import *
 
 client = discord.Client()
+api = AppPixivAPI()
+api.login("username","password")
 
 @client.event
 async def on_ready():
@@ -18,6 +22,11 @@ async def on_message(message):
 		await client.delete_message(message)
 		await gallery_details(message.content[23:], message.channel.id)
 		await client.send_message(message.channel, '```' + message.content + '```')
+	if message.content[:40] == 'https://www.pixiv.net/member_illust.php?':
+		await client.delete_message(message)
+		await gallery_details_p(message.content[40:], message.channel.id)
+		await client.send_message(message.channel, '```' + message.content + '```')
+
 async def gallery_details(slug, channel):
 	id = slug[:-12]
 	token = slug[-12:][1:-1]
@@ -69,4 +78,16 @@ async def send_gallery(galleryData, channel):
 	urllib.request.urlretrieve(galleryData[8], "download.png")
 	await client.send_file(discord.Object(id=channel), 'download.png')
 	await client.send_message(discord.Object(id=channel), '```\nType: ' + gallery_info[0] + '\n\nName: ' + gallery_info[1] + '\n\nAuthor: ' + gallery_info[2] + '\n\nRating: ' + gallery_info[3] + '\n\nPages: ' + gallery_info[4] + '\n\nTags: ' + gallery_info[5] + '\n\nParody: ' + gallery_info[6] + '\n\nCharacters: ' + gallery_info[7] + '```')
-client.run('your discord bot api key here')
+	os.remove("download.png")
+
+async def gallery_details_p(id, channel):
+	split = id.find("&illust_id=")
+	size = id[5:split]
+	illust_id = id[split+11:]
+	galleryInfo = api.illust_detail(int(illust_id),req_auth=True)
+	illust_url = galleryInfo.illust
+	api.download(illust_url.image_urls[size], name="pixiv_" +str(illust_id)+ ".png")
+	await client.send_file(discord.Object(id=channel), "pixiv_" +str(illust_id)+'.png')
+	os.remove("pixiv_" +str(illust_id)+'.png')
+
+client.run('discord bot api key here')
