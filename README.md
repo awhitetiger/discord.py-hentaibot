@@ -13,3 +13,4 @@ This script requires Python36, [discord.py](https://github.com/Rapptz/discord.py
 2. !sauce imageurl - creates a sauce bounty
 3. !give_sauce id sauceurl - sends sauce to bounty poster where they then need to confirm.
 4. !confirm_id - used by bounty posters to remove bounties once they've been sauced.
+both pivix and hentai links will be detected automatically no need for a command.
